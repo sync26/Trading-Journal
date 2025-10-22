@@ -1,263 +1,395 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Journal</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#0c1018;--panel:#121826;--card:#161d2e;--border:#1e2740;
-  --text:#dce3f0;--muted:#94a0b8;--green:#4fff9a;--red:#ff6574;--blue:#4db3ff;
-}
-*{box-sizing:border-box}
-html,body{
-  margin:0;height:100%;
-  font-family:'Poppins',system-ui,sans-serif;
-  background:var(--bg);color:var(--text)
-}
-.wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-h1{
-  font-size:26px;
-  margin:0 0 24px;
-  font-weight:700;
-  text-align:left;
-  color:#4db3ff;
-  letter-spacing:0.5px;
-}
-.panel{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.5)
-}
-.top-section{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
-.left-stats{
-  flex:1 1 350px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:12px;
-  align-content:start
-}
-.right-chart{flex:2 1 500px;min-width:320px}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  text-align:center
-}
-.label{font-size:12px;color:var(--muted)}
-.value{font-weight:700;font-size:22px;margin-top:4px}
-.value.green{color:var(--green)}.value.red{color:var(--red)}.value.blue{color:var(--blue)}
-.card.roi-wide{
-  grid-column:1 / -1;
-  text-align:center;
-  padding:18px;
-  background:linear-gradient(180deg,#182234,#101621);
-  border:1px solid #294065;
-}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
-button{
-  background:#182234;
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  font-family:'Poppins',sans-serif;
-}
-button.btn{background:linear-gradient(180deg,#22345a,#182234);border-color:#33507c}
-button.btn:hover{filter:brightness(1.1)}
-button.red{background:linear-gradient(180deg,#4a1a1a,#2b1010);border-color:#7c2a2a}
-table{width:100%;border-collapse:separate;border-spacing:0 6px}
-thead th{font-size:12px;text-align:left;color:var(--muted);padding:4px 10px}
-tbody td{
-  padding:10px;
-  background:var(--card);
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border)
-}
-tbody tr td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px}
-tbody tr td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
-.pill{display:inline-flex;padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px}
-.pill.long{background:var(--blue);color:#081019}.pill.short{background:var(--red);color:#fff}
-.pill.canceled{background:#5b677d;color:#fff}
-/* Modal */
-#modalOverlay{
-  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:10
-}
-#formModal{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:20px;
-  width:90%;
-  max-width:480px
-}
-label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
-input,select{
-  background:var(--card);
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:8px;
-  border-radius:8px
-}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Journal Trading</title>
+  <style>
+    :root{
+      --bg:#0a0f14;           /* page */
+      --panel:#0b1116;        /* main panel */
+      --card:#0c1319;         /* table bg */
+      --card-2:#0e151c;       /* sidebar bg */
+      --border:#1a2630;       /* borders */
+      --border-2:#223645;     
+      --text:#e7f3f0;         /* main text */
+      --muted:#9fb2aa;        /* support text */
+      --muted-2:#7f9490;      
+      --accent:#7cff6b;       /* green */
+      --accent-2:#48d2ff;     /* cyan */
+      --red:#ff6574;          /* red */
+      --green:#7cff6b;        /* green */
+      --blue:#6ab8ff;         /* blue */
+      --shadow:0 20px 60px rgba(0,0,0,.45);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{font:15px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color:var(--text); background:radial-gradient(1200px 1200px at 20% -10%, #0f1720 0%, #0b1016 40%, #090d12 70%, var(--bg) 100%) fixed}
+    .wrap{max-width:1400px;margin:24px auto;padding:12px}
+
+    /* layout */
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px}
+    @media (max-width: 1100px){.grid{grid-template-columns:1fr}}
+
+    .panel{background:linear-gradient(180deg, #0b1116 0%, #0a0f14 100%);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .panel-inner{padding:22px}
+
+    /* header */
+    .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .title{font-size:20px;letter-spacing:.1em;text-transform:uppercase}
+    .live{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--muted)}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent)}
+    .stamp{color:var(--muted-2);font-size:12px}
+
+    /* controls */
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:#0cf05b;border:none;color:#05150c;font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:0 8px 24px rgba(12,240,91,.2)}
+    .btn.secondary{background:transparent;color:#cfe9ff;border:1px solid var(--border-2);box-shadow:none}
+    .btn:active{transform:translateY(1px)}
+
+    /* table */
+    .table{margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .thead,.trow{display:grid;grid-template-columns:160px 120px 120px 1fr 1fr 1fr;align-items:center}
+    .thead{background:#0b151c;border-bottom:1px solid var(--border)}
+    .th,.td{padding:12px 14px;white-space:nowrap}
+    .th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9d7d2}
+    .tbody{max-height:520px;overflow:auto}
+    .trow{border-top:1px solid var(--border)}
+
+    /* pills */
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-weight:600;font-size:13px;border:1px solid transparent}
+    .long{color:#0c2; background:rgba(124,255,107,.06); border-color:rgba(124,255,107,.15)}
+    .short{color:#f77; background:rgba(255,101,116,.08); border-color:rgba(255,101,116,.18)}
+
+    /* numbers */
+    .num{font-variant-numeric:tabular-nums lining-nums}
+    .profit-pos{color:var(--green);font-weight:700}
+    .profit-neg{color:var(--red);font-weight:700}
+
+    /* sidebar */
+    .side{background:linear-gradient(180deg, #0b1116 0%, #0a0f14 100%);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .side .head{padding:18px;border-bottom:1px solid var(--border)}
+    .sidetitle{display:flex;align-items:center;gap:8px}
+    .sidetitle .dot{background:#7cff6b}
+    .month{color:var(--muted);font-size:12px;margin-top:2px}
+    .stats{padding:14px 18px 18px}
+
+    .row{display:flex;justify-content:space-between;align-items:center;margin:6px 0;color:var(--muted)}
+    .row strong{font-size:18px;color:var(--text)}
+
+    .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px}
+    .kpi div{background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    .kpi h4{margin:0 0 2px 0;color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+    .kpi .win{color:var(--green);font-size:20px;font-weight:800}
+    .kpi .loss{color:var(--red);font-size:20px;font-weight:800}
+
+    .divider{height:1px;background:var(--border);margin:12px 0}
+
+    .npnl{display:flex;justify-content:space-between;align-items:center}
+
+    .side-actions{display:flex;gap:10px;margin:14px 18px 18px}
+
+    /* dialog */
+    dialog{border:1px solid var(--border);border-radius:16px;max-width:720px;width:96%;background:#0b1116;color:var(--text);box-shadow:var(--shadow)}
+    dialog::backdrop{background:rgba(0,0,0,.65)}
+    .form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:18px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9d7d2}
+    input,select,textarea{background:#0c1319;border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:#fff;outline:none}
+    textarea{grid-column:1/-1;min-height:80px}
+    .form-actions{display:flex;justify-content:flex-end;gap:10px;padding:0 18px 18px}
+
+    /* scrollbar subtle */
+    .tbody::-webkit-scrollbar{height:10px;width:10px}
+    .tbody::-webkit-scrollbar-thumb{background:#1a2832;border-radius:999px}
+    .tbody::-webkit-scrollbar-track{background:#0c1319}
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Trading Journal</h1>
-  <div class="panel">
-    <div class="top-section">
-      <div class="left-stats">
-        <div class="card"><div class="label">Win Rate</div><div class="value blue" id="winrateText">0%</div></div>
-        <div class="card"><div class="label">Total</div><div class="value" id="ttl">0</div></div>
-        <div class="card"><div class="label">Win</div><div class="value green" id="wins">0</div></div>
-        <div class="card"><div class="label">Loss</div><div class="value red" id="losses">0</div></div>
-        <div class="card"><div class="label">Cancel</div><div class="value" id="cancels">0</div></div>
-        <div class="card"><div class="label">Net P&L</div><div class="value green" id="netpnl">0</div></div>
-        <div class="card roi-wide"><div class="label">ROI Total</div><div class="value blue" id="roitext">0%</div></div>
-      </div>
-      <div class="right-chart">
-        <canvas id="pnlChart" height="160"></canvas>
-      </div>
-    </div>
+  <div class="wrap">
+    <div class="grid">
+      <!-- LEFT: main table -->
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="head">
+            <div class="title">JOURNAL TRADING</div>
+            <div class="live"><span class="dot"></span> LIVE</div>
+          </div>
+          <div class="stamp" id="stamp">Last updated: —</div>
 
-    <div class="toolbar">
-      <button class="btn" id="addBtn">+ Tambah Trade</button>
-      <button class="btn" id="exportBtn">Export JSON</button>
-      <button class="btn" id="importBtn">Import JSON</button>
-      <input type="file" id="importFile" accept="application/json" style="display:none">
-    </div>
+          <div class="controls">
+            <button class="btn" id="addBtn">+ Tambah Trade</button>
+            <button class="btn secondary" id="importBtn">Impor JSON</button>
+            <button class="btn secondary" id="exportBtn">Ekspor JSON</button>
+            <input type="file" id="fileInput" accept="application/json" hidden />
+          </div>
 
-    <div style="overflow:auto">
-      <table>
-        <thead><tr><th>PAIR</th><th>SIZE</th><th>POSISI</th><th>PROFIT</th><th>LOSS</th><th>ROI (%)</th><th>HASIL</th><th>NOTES</th><th></th></tr></thead>
-        <tbody id="rows"><tr class="empty"><td colspan="9">Belum ada data.</td></tr></tbody>
-      </table>
+          <div class="table" role="table" aria-label="Journal trading table">
+            <div class="thead" role="row">
+              <div class="th">Pair</div>
+              <div class="th">Position</div>
+              <div class="th">Size</div>
+              <div class="th">Profit ($)</div>
+              <div class="th">Loss ($)</div>
+              <div class="th">Net P&L</div>
+            </div>
+            <div class="tbody" id="tbody">
+              <!-- rows injected by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: sidebar summary (lebih kecil) -->
+      <aside class="side">
+        <div class="head">
+          <div>
+            <div class="sidetitle"><span class="dot"></span><strong>Ringkasan</strong></div>
+            <div class="month" id="monthLabel">Oktober 2025</div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="kpi">
+            <div><h4>Win</h4><div class="win num" id="win">0</div></div>
+            <div><h4>Loss</h4><div class="loss num" id="loss">0</div></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row"><span>Profit</span><strong class="num" style="color:var(--green)" id="grossProfit">$0.00</strong></div>
+          <div class="row"><span>Loss</span><strong class="num" style="color:var(--red)" id="grossLoss">-$0.00</strong></div>
+
+          <div class="divider"></div>
+
+          <div class="row" style="opacity:.9"><span>Total Trades</span><strong class="num" id="totalTrades">0</strong></div>
+
+          <div class="divider"></div>
+
+          <div class="row npnl"><span>Net P&amp;L</span><strong class="num" style="font-size:24px;color:var(--green)" id="netPnl">$0.00</strong></div>
+          <div class="row" style="margin-top:10px"><span>Win Rate</span><strong class="num" id="winRate">0%</strong></div>
+        </div>
+        <div class="side-actions">
+          <button class="btn secondary" id="clearBtn" title="Hapus semua data di perangkat ini">Reset</button>
+        </div>
+      </aside>
     </div>
   </div>
-</div>
 
-<!-- Modal -->
-<div id="modalOverlay">
-  <div id="formModal">
-    <h2 style="color:var(--blue);margin-top:0">Tambah Trade</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <label>Pair<input id="pair" placeholder="ETHUSDT"></label>
-      <label>Position<select id="position"><option>LONG</option><option>SHORT</option><option>NEUTRAL</option></select></label>
-      <label>Size<input id="size" type="number" placeholder="0"></label>
-      <label>Profit<input id="profit" type="number" placeholder="0"></label>
-      <label>Loss<input id="loss" type="number" placeholder="0"></label>
-      <label>ROI (%)<input id="roi" type="number" placeholder="0"></label>
-      <label>Result<select id="result"><option>WIN</option><option>LOSS</option><option>CANCELED</option></select></label>
-      <label style="grid-column:span 2">Notes<input id="notes" placeholder="Catatan"></label>
-    </div>
-    <div class="modal-actions">
-      <button class="red" id="cancelBtn">Batal</button>
-      <button class="btn" id="saveBtn">Simpan</button>
-    </div>
-  </div>
-</div>
+  <!-- Dialog Tambah Trade -->
+  <dialog id="tradeDialog">
+    <form id="tradeForm" method="dialog">
+      <div class="form">
+        <div class="field">
+          <label for="pair">Pair</label>
+          <input id="pair" name="pair" placeholder="contoh: BTC/USDT" required />
+        </div>
+        <div class="field">
+          <label for="position">Posisi</label>
+          <select id="position" name="position" required>
+            <option>Long</option>
+            <option>Short</option>
+          </select>
+        </div>
 
-<script>
-const KEY='trades.v1';
-const CHART_KEY='chart.pnl.v1';
-const q=id=>document.getElementById(id);
-const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}};
-const save=list=>localStorage.setItem(KEY,JSON.stringify(list));
+        <div class="field">
+          <label for="size">Size (kuantitas)</label>
+          <input id="size" name="size" type="number" step="0.0001" placeholder="contoh: 10" required />
+        </div>
+        <div class="field">
+          <label for="profit">Profit ($)</label>
+          <input id="profit" name="profit" type="number" step="0.01" placeholder="0.00" value="0" required />
+        </div>
 
-const loadChartData=()=>{try{return JSON.parse(localStorage.getItem(CHART_KEY))||{labels:[],data:[]}}catch{return{labels:[],data:[]}}};
-const saveChartData=d=>localStorage.setItem(CHART_KEY,JSON.stringify(d));
+        <div class="field">
+          <label for="loss">Loss ($)</label>
+          <input id="loss" name="loss" type="number" step="0.01" placeholder="0.00" value="0" required />
+        </div>
 
-let pnlChart;
-function initChart(){
-  const ctx=q('pnlChart').getContext('2d');
-  const stored=loadChartData();
-  pnlChart=new Chart(ctx,{
-    type:'line',
-    data:{labels:stored.labels,datasets:[{label:'Net P&L',data:stored.data,borderColor:'#4db3ff',backgroundColor:'rgba(77,179,255,.15)',fill:true,tension:.25}]},
-    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a0b8'}},y:{ticks:{color:'#94a0b8'}}}}
-  });
-}
-function updateChart(total){
-  const cdata=loadChartData();
-  const now=new Date().toLocaleDateString();
-  cdata.labels.push(now);
-  cdata.data.push(total);
-  saveChartData(cdata);
-  pnlChart.data.labels=cdata.labels;
-  pnlChart.data.datasets[0].data=cdata.data;
-  pnlChart.update();
-}
-function render(){
-  const list=load(), tbody=q('rows');
-  tbody.innerHTML='';
-  if(!list.length){tbody.innerHTML='<tr class="empty"><td colspan="9">Belum ada data.</td></tr>';updateStats();return;}
-  list.forEach((t,i)=>{
-    const pill=t.result==='WIN'?'<span class="pill long">WIN</span>':t.result==='LOSS'?'<span class="pill short">LOSS</span>':'<span class="pill canceled">CANCELED</span>';
-    const roiVal=(t.result==='LOSS'?-Math.abs(t.roi):Math.abs(t.roi))||0;
-    tbody.innerHTML+=`<tr>
-      <td><b>${t.pair}</b></td><td>${t.size||0}</td><td>${t.position}</td>
-      <td style="color:var(--green)">${t.profit||0}</td><td style="color:var(--red)">${t.loss||0}</td>
-      <td>${roiVal.toFixed(2)}%</td><td>${pill}</td>
-      <td>${t.notes||''}</td>
-      <td><button class="red" onclick="del(${i})">Hapus</button></td></tr>`;
-  });
-  updateStats();
-}
-function updateStats(){
-  const all=load();
-  const win=all.filter(t=>t.result==='WIN').length;
-  const loss=all.filter(t=>t.result==='LOSS').length;
-  const cancel=all.filter(t=>t.result==='CANCELED').length;
-  const net=all.reduce((s,t)=>s+(+t.profit||0)-(+t.loss||0),0);
-  const roi=all.reduce((s,t)=>s+(t.result==='WIN'?+t.roi:t.result==='LOSS'?-Math.abs(+t.roi):0),0);
-  const wr=(win+loss)?Math.round((win/(win+loss))*100):0;
-  q('wins').textContent=win;q('losses').textContent=loss;q('cancels').textContent=cancel;
-  q('ttl').textContent=all.length;q('netpnl').textContent=net.toFixed(2);
-  q('roitext').textContent=(roi>=0?'+':'')+roi.toFixed(2)+'%';
-  q('winrateText').textContent=wr+'%';
-  if(all.length)updateChart(net);
-}
-function addTrade(){
-  const d={pair:q('pair').value.trim(),position:q('position').value,
-    size:+q('size').value||0,profit:+q('profit').value||0,loss:+q('loss').value||0,roi:+q('roi').value||0,
-    result:q('result').value,notes:q('notes').value.trim()};
-  const arr=load();arr.push(d);save(arr);
-}
-function del(i){const arr=load();arr.splice(i,1);save(arr);render();}
-function toggleModal(show){q('modalOverlay').style.display=show?'flex':'none';}
+        <div class="field">
+          <label for="wl">Win/Loss</label>
+          <select id="wl" name="wl">
+            <option value="auto">Auto dari Net</option>
+            <option>Win</option>
+            <option>Loss</option>
+          </select>
+        </div>
 
-q('addBtn').onclick=()=>toggleModal(true);
-q('cancelBtn').onclick=()=>toggleModal(false);
-q('saveBtn').onclick=()=>{addTrade();toggleModal(false);render();};
-q('exportBtn').onclick=()=>{
-  const blob=new Blob([JSON.stringify(load(),null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');
-  a.href=url;a.download='journal.json';a.click();URL.revokeObjectURL(url);
-};
-q('importBtn').onclick=()=>q('importFile').click();
-q('importFile').onchange=e=>{
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try{
-      const data=JSON.parse(ev.target.result);
-      if(Array.isArray(data)){save(data);render();}
-      else alert('Format file tidak valid.');
-    }catch{alert('Gagal membaca file JSON.');}
-  };
-  reader.readAsText(file);
-};
+        <div class="field" style="grid-column:1/-1">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" placeholder="catatan singkat"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn secondary" value="cancel">Batal</button>
+        <button class="btn" id="saveBtn" value="default">Simpan</button>
+      </div>
+    </form>
+  </dialog>
 
-initChart();
-render();
-</script>
+  <script>
+    // ==== util formatting ====
+    const fmtUSD = (n)=> new Intl.NumberFormat('en-US',{style:'currency', currency:'USD', minimumFractionDigits:2}).format(n);
+    const fmtNum = (n, fd=2)=> new Intl.NumberFormat('en-US',{minimumFractionDigits:fd, maximumFractionDigits:fd}).format(Number(n||0));
+    const stampEl = document.getElementById('stamp');
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const updateStamp = ()=>{
+      const now = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const tStr = `${now.toLocaleDateString('en-GB')} , ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${now.getHours()>=12?'PM':'AM'} ${tz}`;
+      stampEl.textContent = `Last updated: ${tStr}`;
+    };
+
+    // ==== state ====
+    const STORAGE_KEY = 'tj_trades_v1';
+    let trades = [];
+
+    function load(){
+      try{ trades = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+      catch{ trades = []; }
+    }
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trades));
+      updateStamp();
+    }
+
+    // ==== compute and render ====
+    const tbody = document.getElementById('tbody');
+    const elWin = document.getElementById('win');
+    const elLoss = document.getElementById('loss');
+    const elGrossProfit = document.getElementById('grossProfit');
+    const elGrossLoss = document.getElementById('grossLoss');
+    const elTotal = document.getElementById('totalTrades');
+    const elNet = document.getElementById('netPnl');
+    const elWR = document.getElementById('winRate');
+
+    function netPnl(t){
+      const pr = Number(t.profit||0);
+      const ls = Number(t.loss||0);
+      if(!isFinite(pr)||!isFinite(ls)) return 0;
+      return pr - ls;
+    }
+
+    function render(){
+      tbody.innerHTML = '';
+      trades.forEach(t=>{
+        const tr = document.createElement('div');
+        tr.className = 'trow';
+        const net = netPnl(t);
+        const pSign = net>=0?'+':'';
+        tr.innerHTML = `
+          <div class=\"td num\">${t.pair}</div>
+          <div class=\"td\"><span class=\"pill ${t.position.toLowerCase()}\">${t.position}</span></div>
+          <div class=\"td num\">${fmtNum(t.size, 4)}</div>
+          <div class=\"td num\">${fmtNum(t.profit)}</div>
+          <div class=\"td num\">${fmtNum(t.loss)}</div>
+          <div class=\"td num ${net>=0?'profit-pos':'profit-neg'}\">${pSign}${fmtNum(Math.abs(net))}</div>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const completed = trades; // semua dianggap selesai
+      const wins = completed.filter(t=> (t.wl||'auto')==='Win' || ((t.wl||'auto')==='auto' && netPnl(t)>0)).length;
+      const losses = completed.filter(t=> (t.wl||'auto')==='Loss' || ((t.wl||'auto')==='auto' && netPnl(t)<0)).length;
+
+      let grossP = 0, grossL = 0;
+      completed.forEach(t=>{ grossP += Math.max(0, Number(t.profit||0)); grossL += Math.max(0, Number(t.loss||0)); });
+      const net = grossP - grossL;
+      const wr = (wins+losses)>0 ? (wins/(wins+losses)*100) : 0;
+
+      elWin.textContent = wins;
+      elLoss.textContent = losses;
+      elGrossProfit.textContent = `${grossP>0?'+':''}${fmtUSD(grossP)}`;
+      elGrossLoss.textContent = `-${fmtUSD(grossL).replace('-','')}`;
+      elTotal.textContent = trades.length;
+      elNet.textContent = `${net>=0?'+':''}${fmtUSD(net)}`;
+      elWR.textContent = `${wr.toFixed(2)}%`;
+    }
+
+    // ==== dialog logic ====
+    const dlg = document.getElementById('tradeDialog');
+    const addBtn = document.getElementById('addBtn');
+    const form = document.getElementById('tradeForm');
+
+    addBtn.addEventListener('click', ()=>{
+      form.reset();
+      document.getElementById('profit').value = 0;
+      document.getElementById('loss').value = 0;
+      dlg.showModal();
+    });
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const data = new FormData(form);
+      const t = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        pair: (data.get('pair')||'').toString().trim(),
+        position: data.get('position')||'Long',
+        size: parseFloat(data.get('size')||'0'),
+        profit: parseFloat(data.get('profit')||'0'),
+        loss: parseFloat(data.get('loss')||'0'),
+        wl: data.get('wl')||'auto',
+        notes: (data.get('notes')||'').toString(),
+        ts: Date.now()
+      };
+      if(!t.pair || !isFinite(t.size)){
+        alert('Pair dan Size wajib diisi.');
+        return;
+      }
+      trades.unshift(t);
+      save();
+      render();
+      dlg.close();
+    });
+
+    // ==== import/export/reset ====
+    const fileInput = document.getElementById('fileInput');
+    document.getElementById('importBtn').addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        try{
+          const data = JSON.parse(String(ev.target.result||'[]'));
+          if(!Array.isArray(data)) throw new Error('format salah');
+          trades = data;
+          save();
+          render();
+        }catch(err){
+          alert('Gagal impor JSON: '+err.message);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = '';
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(trades,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const d = new Date();
+      a.download = `trading-journal-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      if(confirm('Hapus semua trade di perangkat ini?')){
+        trades = [];
+        save();
+        render();
+      }
+    });
+
+    // ==== boot ====
+    load();
+    render();
+    updateStamp();
+    document.getElementById('monthLabel').textContent = new Date().toLocaleDateString('id-ID',{month:'long', year:'numeric'});
+  </script>
 </body>
 </html>

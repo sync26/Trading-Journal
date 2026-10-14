@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jurnal Trading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0e17;--card:#121320;--line:#23253a;--grid:#2a2d45;--text:#eceef7;--mute:#8a8ea8;--win:#2fd29a;--loss:#ff4d3d;--accent:#7c6cf0;--accent-bg:#2a2468;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,sans-serif;padding:16px 14px 70px;font-variant-numeric:tabular-nums}
+main{max-width:640px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:18px;margin:0;font-weight:600}
+select,input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;width:100%}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.unit{width:auto;padding:6px 10px;font-size:13px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:9px;border:1px solid var(--line);background:transparent;color:var(--mute);border-radius:999px;font:inherit;font-size:14px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--accent-bg);color:#fff;border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:14px;overflow:hidden}
+.hero{padding:18px 20px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.lbl{color:var(--mute);border-bottom:1px dashed var(--mute);display:inline-block;line-height:1.3}
+.big{font-size:34px;font-weight:600;line-height:1.25;margin-top:8px;word-break:break-word}
+.badge{display:inline-block;font-size:14px;font-weight:500;padding:2px 12px;border-radius:999px;vertical-align:middle;margin-left:8px}
+.badge.pos{background:rgba(47,210,154,.14)}.badge.neg{background:rgba(255,77,61,.14)}
+.period{width:92px;flex:none}
+.badge[hidden],.kurs[hidden]{display:none}
+.idr{color:var(--mute);font-size:15px;margin-top:2px}
+.kurs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:13px;color:var(--mute)}
+.kurs input{width:112px;padding:7px 10px}
+.kurs button{background:none;border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;font:inherit;cursor:pointer}
+.stats b{text-align:right}.stats small{font-weight:400;opacity:.85}
+table.noidr .ic{display:none}
+.stats{border-top:1px solid var(--line);padding:16px 20px;display:grid;gap:14px;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:14px 14px}
+.stats div{display:flex;justify-content:space-between;gap:10px}
+.stats b{font-weight:500}
+.pos{color:var(--win)}.neg{color:var(--loss)}
+.chart-bar{border-top:1px solid var(--line);padding:16px 20px;display:flex;gap:10px;align-items:center}
+.ico{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--mute);display:grid;place-items:center;cursor:pointer;padding:0}
+.ico[aria-pressed=true]{background:var(--accent-bg);color:#b9afff;border-color:transparent}
+.ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.share{margin-left:auto;background:none;border:1px solid var(--line);color:var(--text);padding:10px 14px;border-radius:10px;font:inherit;cursor:pointer}
+#chart{padding:0 8px 18px;min-height:250px}
+#chart svg{display:block}
+.empty{padding:40px 10px;text-align:center;color:var(--mute)}
+.calh{display:flex;justify-content:space-between;align-items:center;padding:0 12px 10px}
+.calh button{background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:4px 12px;cursor:pointer;font:inherit}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 8px}
+.cal .dn{text-align:center;color:var(--mute);font-size:12px;padding:2px 0}
+.cal .d{min-height:54px;border-radius:8px;border:1px solid var(--line);padding:4px;font-size:11px;color:var(--mute);overflow:hidden}
+.cal .d b{display:block;font-weight:500;font-size:11px;margin-top:2px;word-break:break-all}
+form{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:16px}
+form>*{min-width:0}
+label{display:block;font-size:12px;color:var(--mute);margin-bottom:3px}
+.c2{grid-column:span 2}.c3{grid-column:span 3}.c6{grid-column:span 6}
+.amt{display:flex;gap:6px}
+.sg{display:flex;flex:none;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sg button{width:46px;border:0;background:var(--bg);color:var(--mute);font-size:22px;cursor:pointer}
+#sg-p[aria-pressed=true]{background:rgba(47,210,154,.2);color:var(--win)}
+#sg-l[aria-pressed=true]{background:rgba(255,77,61,.2);color:var(--loss)}
+.add{padding:12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.msg{margin:0;font-size:13px;color:var(--loss)}.msg.ok{color:var(--win)}
+h2{font-size:15px;font-weight:600;margin:0;padding:16px 16px 0}
+.list{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px;margin-top:8px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--mute);font-size:13px}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:0}
+.chain{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+.del,.edit{background:none;border:0;color:var(--mute);cursor:pointer;font-size:16px;padding:2px 6px}
+.edit:hover{color:var(--accent)}
+tr.editing{background:rgba(124,108,240,.14)}
+.cancel{padding:12px;border:1px solid var(--line);border-radius:10px;background:none;color:var(--text);font:inherit;cursor:pointer}
+.tools{display:flex;gap:8px;justify-content:flex-end}
+.tools button{background:none;border:1px solid var(--line);color:var(--mute);padding:6px 12px;border-radius:8px;cursor:pointer;font:inherit;font-size:13px}
+@media(max-width:520px){.c2,.c3{grid-column:span 6}.big{font-size:30px}}
+@media(prefers-reduced-motion:no-preference){.ico,.tabs button{transition:background .15s}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Jurnal Trading</h1>
+    <select id="unit" class="unit" aria-label="Satuan"><option>USD</option><option>SOL</option></select>
+  </div>
+
+  <div class="kurs" id="kurs-row">
+    <label for="kurs" style="margin:0">Kurs Rp per $</label>
+    <input id="kurs" inputmode="numeric" autocomplete="off" aria-label="Kurs rupiah per dolar">
+    <button type="button" id="kurs-live">Kurs live</button>
+    <span id="kurs-msg" role="status"></span>
+  </div>
+
+  <div class="tabs" id="tabs" role="group" aria-label="Filter chain">
+    <button data-c="all" aria-pressed="true">Semua</button>
+    <button data-c="sol" aria-pressed="false">Solana</button>
+    <button data-c="robinhood" aria-pressed="false">Robinhood</button>
+  </div>
+
+  <section class="card" aria-live="polite">
+    <div class="hero">
+      <div>
+        <span class="lbl" id="tl">Total PnL</span>
+        <div><span class="big" id="total">0</span><span class="badge" id="pct" hidden></span></div>
+        <div class="idr" id="idr"></div>
+      </div>
+      <select id="period" class="period" aria-label="Periode">
+        <option value="1D">1D</option><option value="7D">7D</option><option value="30D">30D</option><option value="ALL" selected>ALL</option>
+      </select>
+    </div>
+    <div class="stats">
+      <div><span class="lbl">Avg Invested</span><b id="s-inv">–</b></div>
+      <div><span class="lbl">Win Rate</span><b id="s-wr">–</b></div>
+      <div><span class="lbl">Biggest Win</span><b id="s-win" class="pos">–</b></div>
+      <div><span class="lbl">Biggest Loss</span><b id="s-loss" class="neg">–</b></div>
+    </div>
+    <div class="chart-bar">
+      <button class="ico" data-v="line" aria-pressed="true" aria-label="Grafik garis"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></button>
+      <button class="ico" data-v="bar" aria-pressed="false" aria-label="Grafik bar"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-3"/></svg></button>
+      <button class="ico" data-v="cal" aria-pressed="false" aria-label="Kalender"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></button>
+      <button class="share" id="share" type="button">Share</button>
+    </div>
+    <div id="chart"></div>
+  </section>
+
+  <section class="card">
+    <h2 id="form-title">Tambah entri</h2>
+    <form id="f" novalidate>
+      <div class="c2"><label for="date">Tanggal</label><input type="date" id="date"></div>
+      <div class="c2"><label for="chain">Chain</label>
+        <select id="chain"><option value="sol">Solana</option><option value="robinhood">Robinhood</option></select></div>
+      <div class="c2"><label for="pair">Pool / pair</label><input id="pair" placeholder="SOL-USDC"></div>
+      <div class="c3"><label for="amt" id="amt-l">Profit (+) / Loss (−)</label>
+        <div class="amt"><input id="amt" inputmode="decimal" autocomplete="off" placeholder="25.5">
+        <div class="sg" role="group" aria-label="Profit atau loss"><button type="button" id="sg-p" aria-pressed="true" aria-label="Profit">+</button><button type="button" id="sg-l" aria-pressed="false" aria-label="Loss">−</button></div></div></div>
+      <div class="c3"><label for="inv">Modal (opsional)</label><input id="inv" inputmode="decimal" autocomplete="off" placeholder="3.79"></div>
+      <div class="c6"><label for="note">Catatan</label><input id="note" placeholder="opsional"></div>
+      <p class="msg c6" id="err" role="alert"></p>
+      <button class="add c6" id="submit-btn" type="submit">Simpan entri</button>
+      <button class="cancel c6" id="cancel" type="button" hidden>Batal edit</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Riwayat</h2>
+    <div class="list">
+      <table>
+        <thead><tr><th>Tanggal</th><th>Chain</th><th>Pool</th><th class="r">P/L</th><th class="r ic">≈ Rp</th><th class="r">Akumulasi</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="empty" hidden>Belum ada entri di periode ini. Isi form di atas lalu simpan.</div>
+  </section>
+
+  <div class="tools">
+    <button id="exp" type="button">Export JSON</button>
+    <button id="imp" type="button">Import JSON</button>
+    <input type="file" id="file" accept="application/json" hidden>
+  </div>
+</main>
+
+<script>
+const KEY = "jurnal-trading-v1", UKEY = "jurnal-unit", KKEY = "jurnal-kurs";
+const NAMES = { sol: "Solana", robinhood: "Robinhood" };
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+let entries = (() => { try { return JSON.parse(lsGet(KEY)) || []; } catch { return []; } })();
+let filter = "all", period = "ALL", view = "line", unit = lsGet(UKEY) === "SOL" ? "SOL" : "USD";
+let sgn = 1, editId = null;
+let kurs = +lsGet(KKEY) > 0 ? +lsGet(KKEY) : 18000;
+let cal = new Date(); cal.setDate(1);
+
+const save = () => lsSet(KEY, JSON.stringify(entries));
+const esc = s => (s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const cls = n => n > 0 ? "pos" : n < 0 ? "neg" : "";
+const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const short = s => s.slice(8) + "/" + s.slice(5, 7);
+
+function num(n) {
+  const d = unit === "SOL" ? 4 : 2;
+  const s = Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  return unit === "SOL" ? s + " SOL" : "$" + s;
+}
+const fmt = n => (n > 0 ? "+" : n < 0 ? "-" : "") + num(n);
+const idr = n => (n > 0 ? "+" : n < 0 ? "-" : "") + "Rp " + Math.abs(Math.round(n * kurs)).toLocaleString("id-ID");
+function tickLabel(v) {
+  const a = +Math.abs(v).toFixed(3);
+  return unit === "SOL" ? (v < 0 ? "-" : "") + a + " SOL" : (v < 0 ? "-$" : "$") + a;
+}
+
+function parseAmount(s) {
+  s = s.replace(/\s/g, "").replace(/[\u2212\u2013]/g, "-").replace(/\$/g, "");
+  const c = s.lastIndexOf(","), d = s.lastIndexOf(".");
+  if (c > -1 && d > -1) { const k = Math.max(c, d); s = s.slice(0, k).replace(/[.,]/g, "") + "." + s.slice(k + 1); }
+  else s = s.replace(",", ".");
+  return /^[+-]?\d*\.?\d+$/.test(s) ? parseFloat(s) : null;
+}
+
+function sortedBy(chain) {
+  return entries.filter(e => chain === "all" || e.chain === chain)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+}
+function cutoff() {
+  const days = { "1D": 1, "7D": 7, "30D": 30 }[period];
+  if (!days) return "";
+  const d = new Date(); d.setDate(d.getDate() - (days - 1));
+  return ymd(d);
+}
+const filtered = () => { const c = cutoff(); return sortedBy(filter).filter(e => e.date >= c); };
+
+/* ---------- kartu ringkasan ---------- */
+function renderCard(list) {
+  const total = list.reduce((a, e) => a + e.amount, 0);
+  $("total").textContent = fmt(total);
+  $("total").className = "big " + cls(total);
+  const rp = unit === "USD";
+  $("idr").hidden = !rp;
+  if (rp) { $("idr").textContent = "≈ " + idr(total); $("idr").className = "idr " + cls(total); }
+  $("tl").textContent = "Total PnL" + (filter === "all" ? "" : " · " + NAMES[filter]);
+
+  const inv = list.filter(e => e.invested > 0);
+  const base = inv.reduce((a, e) => a + e.invested, 0);
+  const pct = $("pct");
+  pct.hidden = !base;
+  if (base) { const p = total / base * 100; pct.textContent = (p > 0 ? "+" : "") + p.toFixed(2) + "%"; pct.className = "badge " + cls(p) + " " + cls(p); }
+  $("s-inv").textContent = inv.length ? num(base / inv.length) : "–";
+
+  const wins = list.filter(e => e.amount > 0), losses = list.filter(e => e.amount < 0);
+  $("s-wr").textContent = list.length ? (wins.length / list.length * 100).toFixed(2) + "% (" + wins.length + "W/" + losses.length + "L)" : "–";
+
+  const extreme = (arr, pick) => {
+    if (!arr.length) return "–";
+    const e = arr.reduce((a, b) => pick(a.amount, b.amount) ? a : b);
+    return fmt(e.amount) + (e.invested > 0 ? " (" + (e.amount > 0 ? "+" : "") + (e.amount / e.invested * 100).toFixed(2) + "%)" : "") + (unit === "USD" ? "<br><small>≈ " + idr(e.amount) + "</small>" : "");
+  };
+  $("s-win").innerHTML = extreme(wins, (a, b) => a >= b);
+  $("s-loss").innerHTML = extreme(losses, (a, b) => a <= b);
+}
+
+/* ---------- chart ---------- */
+function ticks(min, max, n = 4) {
+  if (min === max) max = min + 1;
+  const raw = (max - min) / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+  const step = (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, t = [];
+  for (let v = lo; v <= hi + step / 1e6; v += step) t.push(+v.toFixed(10));
+  return t;
+}
+
+function frame(vals) {
+  const W = $("chart").clientWidth - 16 || 340, H = 250;
+  const pad = { l: 66, r: 10, t: 12, b: 28 };
+  const t = ticks(Math.min(0, ...vals), Math.max(0, ...vals));
+  const lo = t[0], hi = t[t.length - 1];
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const y = v => pad.t + ih * (1 - (v - lo) / (hi - lo));
+  let g = "";
+  for (const v of t) {
+    g += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-dasharray="4 5"/>` +
+         `<text x="${pad.l - 8}" y="${y(v) + 4}" text-anchor="end" fill="var(--mute)" font-size="11">${tickLabel(v)}</text>`;
+  }
+  return { W, H, pad, iw, ih, y, g };
+}
+
+function xLabels(labels, xAt, f) {
+  const n = labels.length, k = Math.min(n, 5);
+  const idx = [...new Set(Array.from({ length: k }, (_, i) => Math.round(i * (n - 1) / Math.max(k - 1, 1))))];
+  return idx.map((i, j) => `<text x="${xAt(i)}" y="${f.H - 8}" text-anchor="${j === 0 && idx.length > 1 ? "start" : j === idx.length - 1 && idx.length > 1 ? "end" : "middle"}" fill="var(--mute)" font-size="11">${labels[i]}</text>`).join("");
+}
+
+function lineChart(list) {
+  let run = 0;
+  const vals = [0, ...list.map(e => (run += e.amount))];
+  const labels = ["", ...list.map(e => short(e.date))];
+  const f = frame(vals), n = vals.length;
+  const xAt = i => f.pad.l + (n === 1 ? 0 : i * f.iw / (n - 1));
+  const pts = vals.map((v, i) => [xAt(i), f.y(v)]);
+  const path = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const col = vals[n - 1] >= 0 ? "var(--win)" : "var(--loss)", neg = vals[n - 1] < 0;
+  const area = path + ` L${pts[n - 1][0]} ${f.y(0)} L${pts[0][0]} ${f.y(0)} Z`;
+  labels[0] = labels[1] || "";
+  return `<svg width="${f.W}" height="${f.H}" role="img" aria-label="Grafik akumulasi profit loss">
+    <defs><linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${col}" stop-opacity="${neg ? 0 : .35}"/><stop offset="1" stop-color="${col}" stop-opacity="${neg ? .35 : 0}"/>
+    </linearGradient></defs>${f.g}
+    <path d="${area}" fill="url(#gr)"/>
+    <path d="${path}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${pts[n - 1][0]}" cy="${pts[n - 1][1]}" r="4" fill="${col}"/>
+    ${xLabels(labels, xAt, f)}</svg>`;
+}
+
+function barChart(list) {
+  const days = {};
+  for (const e of list) days[e.date] = (days[e.date] || 0) + e.amount;
+  const keys = Object.keys(days).sort().slice(-31), vals = keys.map(k => days[k]);
+  const f = frame(vals), n = keys.length, slot = f.iw / n, bw = Math.min(30, slot * .62);
+  const xAt = i => f.pad.l + slot * i + slot / 2, y0 = f.y(0);
+  const bars = vals.map((v, i) => {
+    const y1 = f.y(v), top = Math.min(y0, y1), h = Math.max(Math.abs(y1 - y0), 1.5);
+    return `<rect x="${xAt(i) - bw / 2}" y="${top}" width="${bw}" height="${h}" rx="3" fill="${v >= 0 ? "var(--win)" : "var(--loss)"}"><title>${keys[i]}: ${fmt(v)}</title></rect>`;
+  }).join("");
+  return `<svg width="${f.W}" height="${f.H}" role="img" aria-label="Grafik bar profit loss harian">${f.g}
+    <line x1="${f.pad.l}" x2="${f.W - f.pad.r}" y1="${y0}" y2="${y0}" stroke="var(--mute)" stroke-opacity=".5"/>
+    ${bars}${xLabels(keys.map(short), xAt, f)}</svg>`;
+}
+
+function calendar() {
+  const y = cal.getFullYear(), m = cal.getMonth(), dim = new Date(y, m + 1, 0).getDate(), off = (new Date(y, m, 1).getDay() + 6) % 7;
+  const daily = {}, pre = y + "-" + String(m + 1).padStart(2, "0");
+  for (const e of sortedBy(filter)) if (e.date.startsWith(pre)) daily[e.date] = (daily[e.date] || 0) + e.amount;
+  const max = Math.max(...Object.values(daily).map(Math.abs), 0), sum = Object.values(daily).reduce((a, b) => a + b, 0);
+  let cells = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map(d => `<div class="dn">${d}</div>`).join("") + "<div></div>".repeat(off);
+  for (let d = 1; d <= dim; d++) {
+    const v = daily[pre + "-" + String(d).padStart(2, "0")];
+    const bg = v === undefined ? "" : `background:${v >= 0 ? "rgba(47,210,154," : "rgba(255,77,61,"}${(.12 + .38 * Math.abs(v) / max).toFixed(2)})`;
+    cells += `<div class="d" style="${bg}">${d}${v === undefined ? "" : `<b class="${cls(v)}">${fmt(v)}</b>`}</div>`;
+  }
+  const title = cal.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+  return `<div class="calh"><button type="button" data-m="-1" aria-label="Bulan sebelumnya">‹</button>
+    <span>${title} · <b class="${cls(sum)}">${fmt(sum)}</b></span>
+    <button type="button" data-m="1" aria-label="Bulan berikutnya">›</button></div><div class="cal">${cells}</div>`;
+}
+
+function renderChart(list) {
+  const el = $("chart");
+  if (view === "cal") { el.innerHTML = calendar(); return; }
+  el.innerHTML = list.length ? (view === "bar" ? barChart(list) : lineChart(list)) : `<div class="empty">Belum ada data di periode ini.</div>`;
+}
+
+/* ---------- riwayat ---------- */
+function renderList(list) {
+  let run = 0;
+  const rows = list.map(e => ({ ...e, run: (run += e.amount) })).reverse();
+  $("rows").innerHTML = rows.map(e => `
+    <tr class="${e.id === editId ? "editing" : ""}">
+      <td>${e.date}</td>
+      <td><span class="chain">${NAMES[e.chain]}</span></td>
+      <td title="${esc(e.note)}">${esc(e.pair) || "–"}</td>
+      <td class="r ${cls(e.amount)}">${fmt(e.amount)}</td>
+      <td class="r ic ${cls(e.amount)}">${idr(e.amount)}</td>
+      <td class="r ${cls(e.run)}">${fmt(e.run)}</td>
+      <td class="r"><button class="edit" data-id="${e.id}" aria-label="Edit entri">✎</button><button class="del" data-id="${e.id}" aria-label="Hapus entri">✕</button></td>
+    </tr>`).join("");
+  $("empty").hidden = list.length > 0;
+}
+
+function render() {
+  const list = filtered();
+  renderCard(list); renderChart(list); renderList(list);
+  $("amt-l").textContent = "Profit (+) / Loss (−), " + unit;
+  $("unit").value = unit;
+  $("kurs-row").hidden = unit !== "USD";
+  document.querySelector("table").classList.toggle("noidr", unit !== "USD");
+}
+
+/* ---------- interaksi ---------- */
+function syncTabs() {
+  document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-pressed", x.dataset.c === filter));
+}
+
+$("date").value = ymd(new Date());
+$("kurs").value = kurs;
+
+$("f").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const err = $("err"), raw = $("amt").value, p = parseAmount(raw);
+  const amount = p === null ? null : /^\s*[-+\u2212\u2013]/.test(raw) ? p : sgn * p;
+  if (amount === null || amount === 0) { err.className = "msg c6"; err.textContent = "Isi angka (bukan 0), lalu pilih + profit atau − loss."; return; }
+  const inv = parseAmount($("inv").value), chain = $("chain").value, date = $("date").value || ymd(new Date());
+  const rec = { date, chain, pair: $("pair").value.trim(), note: $("note").value.trim(), amount, invested: inv > 0 ? Math.abs(inv) : 0 };
+  const wasEdit = editId !== null, idx = entries.findIndex(e => e.id === editId);
+  if (wasEdit && idx > -1) entries[idx] = { ...entries[idx], ...rec }; else entries.push({ id: Date.now(), ...rec });
+  save();
+  if (wasEdit) endEdit();
+  if (filter !== "all" && filter !== chain) { filter = "all"; syncTabs(); }
+  if (date < cutoff()) { period = "ALL"; $("period").value = "ALL"; }
+  try { render(); } catch (e) { err.className = "msg c6"; err.textContent = "Gagal render: " + e.message; return; }
+  err.className = "msg ok c6"; err.textContent = (wasEdit ? "Diperbarui: " : "Tersimpan: ") + NAMES[chain] + " " + fmt(amount);
+  $("amt").value = ""; $("inv").value = ""; $("note").value = ""; $("amt").focus();
+});
+
+const setSign = v => {
+  sgn = v;
+  $("sg-p").setAttribute("aria-pressed", v > 0); $("sg-l").setAttribute("aria-pressed", v < 0);
+};
+$("sg-p").onclick = () => setSign(1);
+$("sg-l").onclick = () => setSign(-1);
+
+function startEdit(id) {
+  const e = entries.find(x => x.id === id); if (!e) return;
+  editId = id;
+  $("date").value = e.date; $("chain").value = e.chain; $("pair").value = e.pair || "";
+  $("amt").value = String(Math.abs(e.amount)); setSign(e.amount < 0 ? -1 : 1);
+  $("inv").value = e.invested > 0 ? String(e.invested) : ""; $("note").value = e.note || "";
+  $("form-title").textContent = "Edit entri"; $("submit-btn").textContent = "Update entri"; $("cancel").hidden = false;
+  $("err").className = "msg c6"; $("err").textContent = "";
+  render();
+  $("f").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function endEdit() {
+  editId = null;
+  $("amt").value = ""; $("inv").value = ""; $("note").value = ""; $("pair").value = ""; $("date").value = ymd(new Date());
+  $("form-title").textContent = "Tambah entri"; $("submit-btn").textContent = "Simpan entri"; $("cancel").hidden = true;
+}
+$("cancel").onclick = () => { endEdit(); render(); };
+
+$("tabs").addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  filter = b.dataset.c; syncTabs();
+  if (filter !== "all") $("chain").value = filter;
+  render();
+});
+$("period").onchange = ev => { period = ev.target.value; render(); };
+$("unit").onchange = ev => { unit = ev.target.value; lsSet(UKEY, unit); render(); };
+
+document.querySelectorAll(".ico").forEach(b => b.onclick = () => {
+  view = b.dataset.v;
+  document.querySelectorAll(".ico").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+});
+$("chart").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-m]"); if (!b) return;
+  cal.setMonth(cal.getMonth() + +b.dataset.m); render();
+});
+
+$("rows").addEventListener("click", ev => {
+  const ed = ev.target.closest(".edit");
+  if (ed) { startEdit(+ed.dataset.id); return; }
+  const b = ev.target.closest(".del"); if (!b || !confirm("Hapus entri ini?")) return;
+  if (+b.dataset.id === editId) endEdit();
+  entries = entries.filter(e => e.id !== +b.dataset.id); save(); render();
+});
+
+$("kurs").addEventListener("input", ev => {
+  const v = +ev.target.value.replace(/\D/g, "");
+  if (v > 0) { kurs = v; lsSet(KKEY, v); render(); }
+});
+$("kurs-live").onclick = async () => {
+  const m = $("kurs-msg"); m.textContent = "Mengambil...";
+  try {
+    const j = await (await fetch("https://open.er-api.com/v6/latest/USD")).json();
+    const v = Math.round(j.rates.IDR);
+    if (!(v > 0)) throw 0;
+    kurs = v; lsSet(KKEY, v); $("kurs").value = v; render();
+    m.textContent = "Live: Rp " + v.toLocaleString("id-ID");
+  } catch { m.textContent = "Gagal ambil kurs, isi manual."; }
+};
+
+$("share").onclick = async () => {
+  const list = filtered(), total = list.reduce((a, e) => a + e.amount, 0), w = list.filter(e => e.amount > 0).length;
+  const text = `PnL ${period}${filter === "all" ? "" : " " + NAMES[filter]}: ${fmt(total)} | Win rate ${list.length ? (w / list.length * 100).toFixed(1) : 0}% (${w}W/${list.length - w}L)` + (unit === "USD" ? ` | ≈ ${idr(total)}` : "");
+  try {
+    if (navigator.share) await navigator.share({ text });
+    else { await navigator.clipboard.writeText(text); $("share").textContent = "Tersalin"; setTimeout(() => $("share").textContent = "Share", 1500); }
+  } catch {}
+};
+
+$("exp").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(entries, null, 2)], { type: "application/json" }));
+  a.download = "jurnal-trading.json"; a.click();
+};
+$("imp").onclick = () => $("file").click();
+$("file").onchange = async ev => {
+  try {
+    const data = JSON.parse(await ev.target.files[0].text());
+    if (!Array.isArray(data)) throw 0;
+    entries = data.filter(e => e && typeof e.amount === "number" && NAMES[e.chain] && e.date)
+      .map((e, i) => ({ id: e.id || Date.now() + i, date: e.date, chain: e.chain, pair: e.pair || "", note: e.note || "", amount: e.amount, invested: +e.invested > 0 ? +e.invested : 0 }));
+    save(); render();
+  } catch { alert("File JSON tidak valid."); }
+  ev.target.value = "";
+};
+
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 120); });
+render();
+</script>
+</body>
+</html>

@@ -26,7 +26,7 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
 .big{font-size:34px;font-weight:600;line-height:1.25;margin-top:8px;word-break:break-word}
 .badge{display:inline-block;font-size:14px;font-weight:500;padding:2px 12px;border-radius:999px;vertical-align:middle;margin-left:8px}
 .badge.pos{background:rgba(47,210,154,.14)}.badge.neg{background:rgba(255,77,61,.14)}
-.period{width:92px;flex:none}
+.period{width:116px;flex:none}
 .badge[hidden],.kurs[hidden]{display:none}
 .idr{color:var(--mute);font-size:15px;margin-top:2px}
 .kurs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:13px;color:var(--mute)}
@@ -35,7 +35,7 @@ select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid 
 .stats b{text-align:right}.stats small{font-weight:400;opacity:.85}
 table.noidr .ic{display:none}
 .stats{border-top:1px solid var(--line);padding:16px 20px;display:grid;gap:14px;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:14px 14px}
-.stats div{display:flex;justify-content:space-between;gap:10px}
+.stats div{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .stats b{font-weight:500}
 .pos{color:var(--win)}.neg{color:var(--loss)}
 .chart-bar{border-top:1px solid var(--line);padding:16px 20px;display:flex;gap:10px;align-items:center}
@@ -50,8 +50,8 @@ table.noidr .ic{display:none}
 .calh button{background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:4px 12px;cursor:pointer;font:inherit}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 8px}
 .cal .dn{text-align:center;color:var(--mute);font-size:12px;padding:2px 0}
-.cal .d{min-height:54px;border-radius:8px;border:1px solid var(--line);padding:4px;font-size:11px;color:var(--mute);overflow:hidden}
-.cal .d b{display:block;font-weight:500;font-size:11px;margin-top:2px;word-break:break-all}
+.cal .d{min-height:54px;border-radius:8px;border:1px solid var(--line);padding:3px;font-size:11px;color:var(--mute);overflow:hidden}
+.cal .d b{display:block;font-weight:500;font-size:10px;margin-top:2px;white-space:nowrap;letter-spacing:-.3px}
 form{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:16px}
 form>*{min-width:0}
 label{display:block;font-size:12px;color:var(--mute);margin-bottom:3px}
@@ -109,7 +109,7 @@ tr.editing{background:rgba(124,108,240,.14)}
         <div class="idr" id="idr"></div>
       </div>
       <select id="period" class="period" aria-label="Periode">
-        <option value="1D">1D</option><option value="7D">7D</option><option value="30D">30D</option><option value="ALL" selected>ALL</option>
+        <option value="1D">1D</option><option value="7D">7D</option><option value="30D">30D</option><option value="MTH">Bulan ini</option><option value="ALL" selected>ALL</option>
       </select>
     </div>
     <div class="stats">
@@ -207,6 +207,7 @@ function sortedBy(chain) {
     .sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
 }
 function cutoff() {
+  if (period === "MTH") { const n = new Date(); return ymd(new Date(n.getFullYear(), n.getMonth(), 1)); }
   const days = { "1D": 1, "7D": 7, "30D": 30 }[period];
   if (!days) return "";
   const d = new Date(); d.setDate(d.getDate() - (days - 1));
@@ -222,7 +223,7 @@ function renderCard(list) {
   const rp = unit === "USD";
   $("idr").hidden = !rp;
   if (rp) { $("idr").textContent = "≈ " + idr(total); $("idr").className = "idr " + cls(total); }
-  $("tl").textContent = "Total PnL" + (filter === "all" ? "" : " · " + NAMES[filter]);
+  $("tl").textContent = "Total PnL" + (filter === "all" ? "" : " · " + NAMES[filter]) + (period === "MTH" ? " · Bulan ini" : "");
 
   const inv = list.filter(e => e.invested > 0);
   const base = inv.reduce((a, e) => a + e.invested, 0);
@@ -310,6 +311,7 @@ function barChart(list) {
     ${bars}${xLabels(keys.map(short), xAt, f)}</svg>`;
 }
 
+const cell = v => unit === "USD" && Math.abs(v) >= 100 ? (v < 0 ? "-" : "+") + "$" + Math.round(Math.abs(v)) : fmt(v);
 function calendar() {
   const y = cal.getFullYear(), m = cal.getMonth(), dim = new Date(y, m + 1, 0).getDate(), off = (new Date(y, m, 1).getDay() + 6) % 7;
   const daily = {}, pre = y + "-" + String(m + 1).padStart(2, "0");
@@ -319,7 +321,7 @@ function calendar() {
   for (let d = 1; d <= dim; d++) {
     const v = daily[pre + "-" + String(d).padStart(2, "0")];
     const bg = v === undefined ? "" : `background:${v >= 0 ? "rgba(47,210,154," : "rgba(255,77,61,"}${(.12 + .38 * Math.abs(v) / max).toFixed(2)})`;
-    cells += `<div class="d" style="${bg}">${d}${v === undefined ? "" : `<b class="${cls(v)}">${fmt(v)}</b>`}</div>`;
+    cells += `<div class="d" style="${bg}">${d}${v === undefined ? "" : `<b class="${cls(v)}">${cell(v)}</b>`}</div>`;
   }
   const title = cal.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
   return `<div class="calh"><button type="button" data-m="-1" aria-label="Bulan sebelumnya">‹</button>
@@ -454,7 +456,7 @@ $("kurs-live").onclick = async () => {
 
 $("share").onclick = async () => {
   const list = filtered(), total = list.reduce((a, e) => a + e.amount, 0), w = list.filter(e => e.amount > 0).length;
-  const text = `PnL ${period}${filter === "all" ? "" : " " + NAMES[filter]}: ${fmt(total)} | Win rate ${list.length ? (w / list.length * 100).toFixed(1) : 0}% (${w}W/${list.length - w}L)` + (unit === "USD" ? ` | ≈ ${idr(total)}` : "");
+  const text = `PnL ${period === "MTH" ? "Bulan ini" : period}${filter === "all" ? "" : " " + NAMES[filter]}: ${fmt(total)} | Win rate ${list.length ? (w / list.length * 100).toFixed(1) : 0}% (${w}W/${list.length - w}L)` + (unit === "USD" ? ` | ≈ ${idr(total)}` : "");
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); $("share").textContent = "Tersalin"; setTimeout(() => $("share").textContent = "Share", 1500); }
